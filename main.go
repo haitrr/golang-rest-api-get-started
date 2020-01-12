@@ -10,6 +10,7 @@ import (
 )
 
 type Article struct {
+	Id      string `json:"Id"`
 	Title   string `json:"Title"`
 	Desc    string `json:"desc"`
 	Content string `json:"content"`
@@ -30,6 +31,20 @@ func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(articles)
 }
 
+func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	key := vars["id"]
+
+	// Loop over all of our Articles
+	// if the article.Id equals the key we pass in
+	// return the article encoded as JSON
+	for _, article := range articles {
+		if article.Id == key {
+			json.NewEncoder(w).Encode(article)
+		}
+	}
+}
+
 // Existing code from above
 func handleRequests() {
 	// creates a new instance of a mux router
@@ -37,6 +52,7 @@ func handleRequests() {
 	// replace http.HandleFunc with myRouter.HandleFunc
 	myRouter.HandleFunc("/", homePage)
 	myRouter.HandleFunc("/all", returnAllArticles)
+	myRouter.HandleFunc("/article/{id}", returnSingleArticle)
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
 	// argument
@@ -46,8 +62,8 @@ func handleRequests() {
 func main() {
 	fmt.Println("Rest API v2.0 - Mux Routers")
 	articles = []Article{
-		Article{Title: "Hello", Desc: "Article Description", Content: "Article Content"},
-		Article{Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
+		Article{Id: "1", Title: "Hello", Desc: "Article Description", Content: "Article Content"},
+		Article{Id: "2", Title: "Hello 2", Desc: "Article Description", Content: "Article Content"},
 	}
 	handleRequests()
 }
