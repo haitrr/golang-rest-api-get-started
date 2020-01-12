@@ -84,6 +84,25 @@ func deleteArticle(w http.ResponseWriter, r *http.Request) {
 
 }
 
+func updateArticle(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint hit: update article")
+	vars := mux.Vars(r)
+
+	id := vars["id"]
+
+	reqBody, _ := ioutil.ReadAll(r.Body)
+	var updatedArticle Article
+	json.Unmarshal(reqBody, &updatedArticle)
+
+	for index, article := range articles {
+		if article.Id == id {
+			updatedArticle.Id = article.Id
+			articles[index] = updatedArticle
+			json.NewEncoder(w).Encode(updateArticle)
+		}
+	}
+}
+
 // Existing code from above
 func handleRequests() {
 	// creates a new instance of a mux router
@@ -94,6 +113,7 @@ func handleRequests() {
 	myRouter.HandleFunc("/article/{id}", returnSingleArticle).Methods("GET")
 	myRouter.HandleFunc("/article", createNewArticle).Methods("POST")
 	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
+	myRouter.HandleFunc("/article/{id}", updateArticle).Methods("PUT")
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
 	// argument
