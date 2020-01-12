@@ -33,6 +33,8 @@ func returnAllArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
+
+	fmt.Println("Endpoint Hit: get single article")
 	vars := mux.Vars(r)
 	key := vars["id"]
 
@@ -47,6 +49,7 @@ func returnSingleArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 func createNewArticle(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: create article")
 	// get the body of our POST request
 	// unmarshal this into a new Article struct
 	// append this to our Articles array.
@@ -60,15 +63,37 @@ func createNewArticle(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(article)
 }
 
+func deleteArticle(w http.ResponseWriter, r *http.Request) {
+	fmt.Println("Endpoint Hit: delete article")
+	// once again, we will need to parse the path parameters
+	vars := mux.Vars(r)
+	// we will need to extract the `id` of the article we
+	// wish to delete
+	id := vars["id"]
+
+	// we then need to loop through all our articles
+	for index, article := range articles {
+		// if our id path parameter matches one of our
+		// articles
+		if article.Id == id {
+			// updates our Articles array to remove the
+			// article
+			articles = append(articles[:index], articles[index+1:]...)
+		}
+	}
+
+}
+
 // Existing code from above
 func handleRequests() {
 	// creates a new instance of a mux router
 	myRouter := mux.NewRouter().StrictSlash(true)
 	// replace http.HandleFunc with myRouter.HandleFunc
 	myRouter.HandleFunc("/", homePage)
-	myRouter.HandleFunc("/all", returnAllArticles)
-	myRouter.HandleFunc("/article/{id}", returnSingleArticle)
+	myRouter.HandleFunc("/articles", returnAllArticles)
+	myRouter.HandleFunc("/article/{id}", returnSingleArticle).Methods("GET")
 	myRouter.HandleFunc("/article", createNewArticle).Methods("POST")
+	myRouter.HandleFunc("/article/{id}", deleteArticle).Methods("DELETE")
 	// finally, instead of passing in nil, we want
 	// to pass in our newly created router as the second
 	// argument
